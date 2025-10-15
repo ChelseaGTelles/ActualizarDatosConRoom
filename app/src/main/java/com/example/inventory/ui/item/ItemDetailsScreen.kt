@@ -57,12 +57,22 @@ import com.example.inventory.R
 import com.example.inventory.data.Item
 import com.example.inventory.ui.navigation.NavigationDestination
 import com.example.inventory.ui.theme.InventoryTheme
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.inventory.ui.AppViewModelProvider
+import androidx.compose.runtime.collectAsState
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 
 object ItemDetailsDestination : NavigationDestination {
     override val route = "item_details"
     override val titleRes = R.string.item_detail_title
     const val itemIdArg = "itemId"
     val routeWithArgs = "$route/{$itemIdArg}"
+
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -70,8 +80,10 @@ object ItemDetailsDestination : NavigationDestination {
 fun ItemDetailsScreen(
     navigateToEditItem: (Int) -> Unit,
     navigateBack: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    viewModel: ItemDetailsViewModel = viewModel(factory = AppViewModelProvider.Factory)
 ) {
+    val uiState = viewModel.uiState.collectAsState()
     Scaffold(
         topBar = {
             InventoryTopAppBar(
@@ -95,7 +107,7 @@ fun ItemDetailsScreen(
         }, modifier = modifier
     ) { innerPadding ->
         ItemDetailsBody(
-            itemDetailsUiState = ItemDetailsUiState(),
+            itemDetailsUiState = uiState.value,
             onSellItem = { },
             onDelete = { },
             modifier = Modifier
